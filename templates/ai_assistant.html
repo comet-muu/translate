@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        AI会話アシスタント
+    </title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+</head>
+
+<body class="container py-5">
+
+    <h1 class="mb-4">
+
+        AI会話アシスタント
+
+    </h1>
+
+    <div class="mb-3">
+	<label class="form-label">
+
+            モード選択
+
+        </label>
+
+
+	<select
+	    id="mode"
+            class="form-select">
+
+		<option value="reply">
+			会話返答
+		</option>
+
+		<option value="sentence">
+			単語から文章作成
+		</option>
+
+	</select>
+
+        <label class="form-label">
+
+            言語選択
+
+        </label>
+
+        <select
+            id="language"
+            class="form-select">
+
+            <option value="English">
+
+                English
+
+            </option>
+
+            <option value="Japanese">
+
+                Japanese
+
+            </option>
+
+            <option value="Filipino">
+
+                Filipino
+
+            </option>
+
+        </select>
+
+    </div>
+
+    <button
+        id="recordButton"
+        class="btn btn-primary">
+
+        5秒録音開始
+
+    </button>
+
+    <hr>
+
+    <h3>
+        認識内容
+    </h3>
+
+    <div id="heard"
+         class="mb-4">
+
+    </div>
+
+    <h3>
+        AI返答候補
+    </h3>
+
+    <div id="replies">
+
+    </div>
+
+    <script>
+        function getCookie(name) {
+
+    		let cookieValue = null;
+
+    		if (document.cookie && document.cookie !== '') {
+
+        		const cookies = document.cookie.split(';');
+
+        		for (let i = 0; i < cookies.length; i++) {
+
+            			const cookie = cookies[i].trim();
+
+            			if (
+                			cookie.substring(
+                    			0,
+                    			name.length + 1
+                			) === (name + '=')
+            			) {
+
+                			cookieValue =
+                    			decodeURIComponent(
+                        			cookie.substring(
+                            			name.length + 1
+                        			)
+                    			);
+
+                			break;
+            			}
+        		}
+    		}
+
+    		return cookieValue;
+	}
+
+	const csrftoken =
+    		getCookie('csrftoken');
+
+        let mediaRecorder
+
+        let audioChunks = []
+
+        const button =
+            document.getElementById(
+                'recordButton'
+            )
+
+        button.onclick = async () => {
+
+            const stream =
+                await navigator
+                .mediaDevices
+                .getUserMedia({
+                    audio: true
+                })
+
+            mediaRecorder =
+                new MediaRecorder(stream,{mimeType:'audio/webm;codecs=opus'})
+
+            audioChunks = []
+
+            mediaRecorder.ondataavailable = event => {
+
+                audioChunks.push(event.data)
+            }
+
+            mediaRecorder.onstop = async () => {
+
+                const audioBlob =
+                    new Blob(
+                        audioChunks,
+                        {
+                            type: 'audio/webm;codecs=opus'
+                        }
+                    )
+
+                const formData =
+                    new FormData()
+
+                formData.append(
+                    'audio',
+                    audioBlob,
+                    'record.webm'
+                )
+
+                formData.append(
+
+                    'language',
+
+                    document
+                    .getElementById(
+                        'language'
+                    )
+                    .value
+                )
+
+		formData.append(
+
+    		    'mode',
+
+    		    document
+    		    .getElementById(
+        		'mode'
+    		    )
+    		    .value
+		)
+
+                const response =
+                    await fetch(
+
+                        '/ai-assistant/',
+
+                        {
+                            method: 'POST',
+
+			    headers: {
+                		'X-CSRFToken': csrftoken
+            		    },
+
+                            body: formData
+                        }
+                    )
+
+                const data =
+                    await response.json()
+
+                document
+                .getElementById(
+                    'heard'
+                )
+                .innerText =
+                    data.heard
+
+                document
+                .getElementById(
+                    'replies'
+                )
+                .innerText =
+                    data.replies
+            }
+
+            mediaRecorder.start()
+
+            button.innerText =
+                '録音中...'
+
+            setTimeout(() => {
+
+                mediaRecorder.stop()
+
+                button.innerText =
+                    '5秒録音開始'
+
+            }, 5000)
+        }
+
+    </script>
+
+</body>
+
+</html>

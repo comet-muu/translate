@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<h1 class="mb-4">
+    フォトギャラリー
+</h1>
+
+<div class="card p-4 mb-4">
+
+    <form method="post"
+          enctype="multipart/form-data">
+
+        {% csrf_token %}
+
+        {{ form|crispy }}
+
+        <button class="btn btn-primary">
+
+            アップロード
+
+        </button>
+
+    </form>
+
+</div>
+
+<form method="post"
+      action="/delete-all-photos/"
+      class="mb-4">
+
+    {% csrf_token %}
+
+    <button
+        class="btn btn-danger"
+        onclick="return confirm('本当に全削除しますか？')">
+
+        全削除
+
+    </button>
+
+</form>
+
+{% for photo in page_obj %}
+
+<div class="card mb-4">
+
+    {% if photo.manga_image %}
+        <img src="{{ photo.manga_image.url }}">
+    {% else %}
+        変換中...
+    {% endif %}
+
+    <div class="card-body">
+
+    	<p>
+            {{ photo.created_at }}
+    	</p>
+
+    	<form method="post"
+            action="/delete-photo/{{ photo.id }}/">
+
+            {% csrf_token %}
+
+            <button
+            	class="btn btn-danger"
+            	onclick="return confirm('本当に削除しますか？')">
+
+            	削除
+
+            </button>
+
+    	</form>
+
+    </div>
+
+</div>
+
+{% endfor %}
+
+<nav>
+
+<ul class="pagination">
+
+{% if page_obj.has_previous %}
+
+<li class="page-item">
+
+    <a class="page-link"
+       href="?page={{ page_obj.previous_page_number }}">
+
+       前へ
+
+    </a>
+
+</li>
+
+{% endif %}
+
+<li class="page-item active">
+
+    <span class="page-link">
+
+        {{ page_obj.number }}
+
+    </span>
+
+</li>
+
+{% if page_obj.has_next %}
+
+<li class="page-item">
+
+    <a class="page-link"
+       href="?page={{ page_obj.next_page_number }}">
+
+       次へ
+
+    </a>
+
+</li>
+
+{% endif %}
+
+</ul>
+
+</nav>
+
+{% endblock %}

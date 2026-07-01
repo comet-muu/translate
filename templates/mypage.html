@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="mb-4">
+    マイページ
+</h1>
+
+<p class="fs-5">
+    {{ user.email }}
+</p>
+
+<div class="list-group">
+
+    <a href="/gallery/"
+       class="list-group-item list-group-item-action">
+
+        フォトギャラリー
+
+    </a>
+
+    <a href="/ai-assistant/"
+       class="list-group-item list-group-item-action">
+
+        AI会話アシスタント
+
+    </a>
+
+    <a href="#"
+       class="list-group-item list-group-item-action">
+
+        通知
+
+    </a>
+
+    <a href="#"
+       class="list-group-item list-group-item-action">
+
+        設定
+
+    </a>
+
+    <form method="post"
+          action="/accounts/logout/">
+
+        {% csrf_token %}
+
+        <button class="list-group-item list-group-item-action text-danger w-100 text-start">
+
+            ログアウト
+
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
