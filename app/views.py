@@ -13,9 +13,6 @@ import tempfile
 import base64,os
 from django.core.files.base import ContentFile
 
-client = OpenAI(
-    api_key=settings.OPENAI_API_KEY
-)
 #language = "English"
 
 
@@ -23,6 +20,11 @@ client = OpenAI(
 def ai_assistant(request):
 
     if request.method == 'POST':
+
+        client = OpenAI(
+            api_key=settings.OPENAI_API_KEY
+        )
+
 
         audio_file = request.FILES['audio']
 
@@ -151,6 +153,10 @@ def mypage(request):
 def photo_gallery(request):
 
     if request.method == 'POST':
+
+        client = OpenAI(
+            api_key=settings.OPENAI_API_KEY
+        )
 
         form = PhotoForm(
             request.POST,
